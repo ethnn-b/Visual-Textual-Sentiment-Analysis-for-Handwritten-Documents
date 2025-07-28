@@ -1,0 +1,1 @@
+# Visual-Textual-Sentiment-Analysis-for-Handwritten-Documents
