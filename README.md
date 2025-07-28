@@ -60,21 +60,7 @@ The project follows a two-stage pipeline: OCR followed by Sentiment Analysis.
 
 * **Front-End:** HTML, Tailwind CSS, JavaScript
 
-## Project Structure
 
-To run this application, your project folder should be organized as follows:
-
-```
-ocr-webapp/
-├── templates/
-│   └── index.html          # Front-end HTML file
-├── app.py                  # Main Flask application
-├── my_ocr_model.h5         # Trained OCR model
-├── label_encoder.pickle    # Saved OCR label encoder
-├── sentiment_model.h5      # Trained sentiment model
-└── tokenizer.pickle        # Saved sentiment tokenizer
-
-```
 
 
 
