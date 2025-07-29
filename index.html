@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Handwriting OCR & Sentiment Analysis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .file-input-button {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .file-input-button:hover {
+            background-color: #4f46e5;
+        }
+        #spinner {
+            border-top-color: #4f46e5;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-2xl bg-white rounded-xl shadow-lg p-8 md:p-12">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Handwriting Analyzer</h1>
+            <p class="text-gray-600 mt-2">Upload an image of handwritten text to get the recognized sentence and its sentiment.</p>
+        </div>
+
+        <!-- File Upload Section -->
+        <div class="mb-6">
+            <label for="imageUpload" class="file-input-button w-full text-center block bg-indigo-600 text-white font-semibold rounded-lg p-4">
+                <span id="upload-text">Select an Image</span>
+            </label>
+            <input type="file" id="imageUpload" class="hidden" accept="image/*">
+        </div>
+        
+        <!-- Image Preview -->
+        <div id="imagePreviewContainer" class="hidden mb-6 text-center">
+            <img id="imagePreview" class="max-w-full max-h-64 mx-auto rounded-lg shadow-md" alt="Image Preview">
+        </div>
+
+        <!-- Analyze Button -->
+        <button id="analyzeBtn" class="w-full bg-gray-800 text-white font-bold rounded-lg p-4 text-lg hover:bg-gray-700 transition duration-300 disabled:bg-gray-400" disabled>
+            Analyze
+        </button>
+
+        <!-- Results Section -->
+        <div id="results" class="mt-8 hidden">
+            <div id="spinner-container" class="flex justify-center items-center mb-4">
+                <div id="spinner" class="animate-spin rounded-full h-12 w-12 border-4 border-gray-300 border-t-indigo-600"></div>
+            </div>
+            <div id="result-content" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-semibold text-gray-900 mb-2">Recognized Text:</h2>
+                    <p id="ocrResult" class="text-lg bg-gray-100 p-4 rounded-lg text-gray-700"></p>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-semibold text-gray-900 mb-2">Predicted Sentiment:</h2>
+                    <p id="sentimentResult" class="text-lg font-bold p-4 rounded-lg"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const imageUpload = document.getElementById('imageUpload');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+        const imagePreview = document.getElementById('imagePreview');
+        const ocrResult = document.getElementById('ocrResult');
+        const sentimentResult = document.getElementById('sentimentResult');
+        const resultsDiv = document.getElementById('results');
+        const spinnerContainer = document.getElementById('spinner-container');
+        const resultContent = document.getElementById('result-content');
+        const uploadText = document.getElementById('upload-text');
+
+        let uploadedFile = null;
+
+        imageUpload.addEventListener('change', (event) => {
+            uploadedFile = event.target.files[0];
+            if (uploadedFile) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    imagePreview.src = e.target.result;
+                    imagePreviewContainer.classList.remove('hidden');
+                };
+                reader.readAsDataURL(uploadedFile);
+                uploadText.textContent = `Selected: ${uploadedFile.name}`;
+                analyzeBtn.disabled = false;
+            } else {
+                analyzeBtn.disabled = true;
+                uploadText.textContent = 'Select an Image';
+            }
+        });
+
+        analyzeBtn.addEventListener('click', () => {
+            if (uploadedFile) {
+                resultsDiv.classList.remove('hidden');
+                spinnerContainer.classList.remove('hidden');
+                resultContent.classList.add('hidden');
+                realAnalysis(uploadedFile);
+            }
+        });
+
+        async function realAnalysis(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                // This sends the file to your Python back-end
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                // Display the real results from the model
+                ocrResult.textContent = data.sentence || "Could not recognize text.";
+                const sentiment = data.sentiment || "N/A";
+                sentimentResult.textContent = sentiment;
+                
+                // Style the result
+                const sentimentStyles = getSentimentStyles(sentiment);
+                sentimentResult.className = 'text-lg font-bold p-4 rounded-lg'; // Reset classes
+                sentimentResult.classList.add(sentimentStyles.bgColor, sentimentStyles.textColor);
+
+            } catch (error) {
+                console.error("Error during analysis:", error);
+                ocrResult.textContent = "An error occurred during analysis.";
+                sentimentResult.textContent = "Error";
+            } finally {
+                spinnerContainer.classList.add('hidden');
+                resultContent.classList.remove('hidden');
+            }
+        }
+
+        function getSentimentStyles(sentiment) {
+            switch (sentiment.toLowerCase()) {
+                case 'angry':
+                    return { bgColor: 'bg-red-100', textColor: 'text-red-700' };
+                case 'happy':
+                    return { bgColor: 'bg-green-100', textColor: 'text-green-700' };
+                case 'neutral':
+                    return { bgColor: 'bg-gray-200', textColor: 'text-gray-700' };
+                default:
+                    return { bgColor: 'bg-gray-200', textColor: 'text-gray-700' };
+            }
+        }
+    </script>
+</body>
+</html>
