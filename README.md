@@ -2,53 +2,23 @@
 
 This project analyzes handwritten text from an image by first recognizing the characters using a custom-built Optical Character Recognition (OCR) model and then determining the emotional sentiment of the recognized text using a sentiment classification model. The entire pipeline is deployed as a web application using Flask.
 
+<img width="597" height="750" alt="image" src="https://github.com/user-attachments/assets/9430bbf2-b592-4d9b-9390-b049c0e053f0" />
+
+# iHandwriting OCR and Sentiment Analysis
+
+A web application that performs Optical Character Recognition (OCR) on an uploaded image of handwritten text and then analyzes its sentiment. The project uses a custom CNN for OCR and an LSTM for sentiment analysis, all deployed with a Flask back-end.
+
 ## Features
 
-* **Handwriting Recognition (OCR):** A Convolutional Neural Network (CNN) trained to identify individual handwritten characters from an image.
+* **Handwriting Recognition (OCR):** A Convolutional Neural Network (CNN) trained on a custom dataset to identify individual handwritten characters.
 
-* **Sentiment Analysis:** A Recurrent Neural Network (RNN) with Bidirectional LSTM layers that classifies the recognized text into 'Angry', 'Happy', or 'Neutral' categories.
+* **Sentiment Analysis:** An LSTM-based Recurrent Neural Network (RNN) trained on the Stanford Sentiment140 dataset to classify text as **Positive** or **Negative**.
 
-* **Web Interface:** A clean, user-friendly front-end built with HTML and Tailwind CSS that allows users to upload an image and view the results.
-
-* **Python Back-End:** A Flask server that hosts the trained models and handles the image processing and prediction logic.
+* **Full-Stack Application:** A user-friendly front-end (HTML/JS/Tailwind) powered by a Python/Flask back-end that handles model inference.
 
 ## Methodology
 
-The project follows a two-stage pipeline: OCR followed by Sentiment Analysis.
-
-1. **OCR Data Loading and Preprocessing:**
-
-   * The custom dataset is loaded, consisting of character images (`alphabet_images`) and their corresponding labels (`alphabet_labels.csv`).
-
-   * Images are converted to grayscale, normalized to pixel values between 0 and 1, and labels are numerically encoded.
-
-2. **OCR Model Training:**
-
-   * A Convolutional Neural Network (CNN) is built and compiled using TensorFlow/Keras.
-
-   * The model is trained on the preprocessed image data to learn to classify characters.
-
-3. **Character Segmentation and Prediction:**
-
-   * When a new image is uploaded, it is preprocessed and sliced into 28x28 pixel segments.
-
-   * The trained OCR model predicts the character contained in each segment.
-
-   * The individual character predictions are stitched back together, including spaces, to reconstruct the full sentence.
-
-4. **Sentiment Data and Model Training:**
-
-   * A separate dataset of sentences and their sentiment labels ('Angry', 'Happy', 'Neutral') is loaded.
-
-   * The text is tokenized and converted into padded sequences.
-
-   * A Bidirectional LSTM model is built and trained on this data to understand the emotional context of sentences.
-
-5. **Final Sentiment Prediction:**
-
-   * The sentence reconstructed by the OCR model is fed into the trained sentiment analysis model.
-
-   * The final sentiment is predicted and displayed to the user.
+The application employs a two-stage pipeline. When a user uploads an image, a CNN-based OCR model first recognizes the handwritten characters. The resulting text is then passed to an LSTM-based sentiment model to classify its sentiment as 'Positive' or 'Negative'. The final result is then displayed to the user.
 
 ## Technology Stack
 
@@ -59,6 +29,24 @@ The project follows a two-stage pipeline: OCR followed by Sentiment Analysis.
 * **Image Processing:** OpenCV, NumPy
 
 * **Front-End:** HTML, Tailwind CSS, JavaScript
+
+## Project Structure
+
+Your project folder must be organized as follows to run the application:
+
+```
+ocr-webapp/
+├── templates/
+│   └── index.html                      # Front-end HTML file
+├── app.py                              # Main Flask application
+├── ocr_character_recognition_model.h5  # Trained OCR model
+├── ocr_label_encoder.pkl               # Saved OCR label encoder
+├── sentiment_model_stanford.h5         # Trained sentiment model
+└── tokenizer_stanford.pickle           # Saved sentiment tokenizer
+```
+
+
+
 
 
 
